@@ -1,20 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import { FlatList, StyleSheet, View, Text, ActivityIndicator, TouchableHighlight, Platform, ActionSheetIOS, Animated} from 'react-native';
+import { FlatList, StyleSheet, SafeAreaView, View, Text, ActivityIndicator, TouchableHighlight} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import {RectButton} from 'react-native-gesture-handler';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 
-import axios from 'axios'; //Only import if using api
+import axios from 'axios';
 
 import { addQuotes, deleteQuote } from "../actions";
 
-//Buttons for Action Sheet
-const BUTTONS = [
-    "Edit",
-    "Delete",
-    'Cancel',
-];
-const CANCEL_INDEX = 2;
+import ListItem from "./ListItem";
 
 export default function Home(props) {
     const dispatch = useDispatch();
@@ -40,7 +32,8 @@ export default function Home(props) {
 
         let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
         axios.get(url)
-            .then((res) => dispatch(addQuotes(res)))
+            .then(res => res.data)
+            .then((data) => dispatch(addQuotes(data)))
             .catch(error => alert(error.message))
             .finally(() => setIsFetching(false));
     };
@@ -50,78 +43,16 @@ export default function Home(props) {
     //4 - RENDER FLATLIST ITEM
     const renderItem = ({item, index}) => {
         return (
-            <Swipeable
-                renderLeftActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
-                <View style={styles.row}>
-                    <Text style={styles.quote}>
-                        {item.quote}
-                    </Text>
-                    <Text style={styles.author}>
-                        {item.author}
-                    </Text>
-                </View>
-            </Swipeable>
+            <ListItem item={item} index={index} navigation={navigation} onDelete={onDelete}/>
         )
-    };
-
-    renderLeftActions = (progress, dragX, quote) => {
-        const trans = dragX.interpolate({
-            inputRange: [0, 50, 100, 101],
-            outputRange: [-20, 0, 0, 1],
-        });
-
-        const onPress = () => deleteWithQuoteId(quote.id);
-        return (
-            <View style={{ width: 192, flexDirection: 'row' }}>
-                <RectButton style={styles.leftAction} onPress={onPress}>
-                    <Animated.Text
-                        style={[
-                            styles.actionText,
-                            {
-                                transform: [{ translateX: trans }],
-                            },
-                        ]}>
-                        Delete
-                    </Animated.Text>
-                </RectButton>
-                {/*{this.renderRightAction('More', '#C8C7CD', 192, progress)}*/}
-                {/*{this.renderRightAction('Flag', '#ffab00', 128, progress)}*/}
-                {/*{this.renderRightAction('More', '#dd2c00', 64, progress)}*/}
-            </View>
-
-
-        );
-    };
-
-    //==================================================================================================
-
-    //5 - SHOW ACTION SHEET
-    const showOptions = (quote) => {
-        if (Platform.OS === 'ios'){
-            ActionSheetIOS.showActionSheetWithOptions({
-                    options: BUTTONS,
-                    cancelButtonIndex: CANCEL_INDEX,
-                    destructiveButtonIndex: 1,
-                },
-                (buttonIndex) => {
-                    if (buttonIndex === 0){
-                        navigation.navigate('NewQuote', {
-                            quote: quote,
-                            title:"Edit Quote"
-                        });
-                    }else if (buttonIndex === 1) deleteWithQuoteId(quote.id)
-                });
-        }
     };
 
     //==================================================================================================
 
     //6 - DELETE QUOTE
-    const deleteWithQuoteId = (id) => {
-        setIsFetching(true);
-
+    const onDelete = (id) => {
         let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
-        axios.delete(url, {id})
+        axios.delete(url, {data:{id:id}})
             .then((res) => {
 
                 alert("back");
@@ -143,22 +74,29 @@ export default function Home(props) {
         );
     } else{
         return (
-            <View style={{flex:1, backgroundColor: '#F5F5F5', paddingTop:20}}>
+            <SafeAreaView style={styles.container}>
                 <FlatList
                     data={quotes}
                     renderItem={renderItem}
                     keyExtractor={(item, index) => `quotes_${index}`}/>
 
                 <TouchableHighlight style={styles.floatingButton}
-                                    underlayColor='#ff7043' onPress={() => Actions.new_quote()}>
+                                    underlayColor='#ff7043'
+                                    onPress={() => navigation.navigate('NewQuote', {title:"New Quote"})}>
                     <Text style={{fontSize: 25, color: 'white'}}>+</Text>
                 </TouchableHighlight>
-            </View>
+            </SafeAreaView>
         );
     }
 };
 
 const styles = StyleSheet.create({
+
+    container: {
+        flex:1,
+        backgroundColor: '#F5F5F5'
+    },
+
     activityIndicatorContainer:{
         backgroundColor: "#fff",
         alignItems: 'center',
@@ -185,39 +123,5 @@ const styles = StyleSheet.create({
             height: 1,
             width: 0
         }
-    },
-
-    row:{
-        borderBottomWidth: 1,
-        borderColor: "#ccc",
-        padding: 10
-    },
-
-    author: {
-        fontSize: 14,
-        fontWeight: "600",
-        marginTop: 8 * 2
-    },
-
-    quote: {
-        marginTop: 5,
-        fontSize: 14,
-    },
-
-    leftAction: {
-        flex: 1,
-        backgroundColor: '#497AFC',
-        justifyContent: 'center',
-    },
-    actionText: {
-        color: 'white',
-        fontSize: 16,
-        backgroundColor: 'transparent',
-        padding: 10,
-    },
-    rightAction: {
-        alignItems: 'center',
-        flex: 1,
-        justifyContent: 'center',
     },
 });

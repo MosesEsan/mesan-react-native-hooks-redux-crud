@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Dimensions, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, TouchableHighlight} from 'react-native';
+import {StyleSheet, View, Dimensions, Text, TextInput, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, TouchableHighlight} from 'react-native';
 
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import axios from "axios";
 
-import { addQuote, updateQuote } from "../actions";
+import {addQuote, updateQuote} from "../actions";
 
 const {width: windowWidth} = Dimensions.get('window');
 
@@ -12,33 +12,41 @@ export default function NewQuote(props) {
     const dispatch = useDispatch();
     const { navigation } = props;
 
+    let quote = navigation.getParam('quote');
+
     //1 - DECLARE VARIABLES
     const [isSaving, setIsSaving] = useState(false);
-    const [author, setAuthor] = useState(props.quote ? props.quote.author : "");
-    const [quote, setQuote] = useState(props.quote ? props.quote.quote : "");
+    const [author, setAuthor] = useState(quote ? quote.author : "");
+    const [text, setText] = useState(quote ? quote.text : "");
 
     //==================================================================================================
 
     //2 - GET FLATLIST DATA
-    const addNewQuote = () => {
+    const onSave = () => {
+
         let quote_ = {};
 
-        if (props.quote){
-            quote_ = props.quote;
+        if (quote){
+            quote_ = quote;
             quote_['author'] = author;
-            quote_['quote'] = quote;
+            quote_['text'] = text;
         }else{
             let id = generateID();
-            quote_ = {"id": id, "author": author, "quote": quote};
+            quote_ = {"id": id, "author": author, "text": text};
         }
 
         let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
         axios.post(url, quote_)
-            .then((res) => {
-                dispatch(props.quote ? updateQuote(quote_) : addQuote(quote_));
+            .then(res => res.data)
+            .then((data) => {
+                dispatch(quote ? updateQuote(data) : addQuote(data));
                 navigation.goBack();
             })
-            .catch(error => alert(error.message))
+            .catch(error => {
+
+                console.log(error)
+                alert(error.message)
+            })
     };
 
     //==================================================================================================
@@ -58,7 +66,7 @@ export default function NewQuote(props) {
     //==================================================================================================
 
     //4 - RENDER
-    let disabled = (author.length > 0 && quote.length > 0) ? false : true;
+    let disabled = (author.length > 0 && text.length > 0) ? false : true;
     return (
         <KeyboardAvoidingView behavior="padding" style={[styles.container]}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -74,19 +82,18 @@ export default function NewQuote(props) {
                         />
                         <TextInput
                             multiline={true}
-                            onChangeText={(text) => setQuote(text)}
+                            onChangeText={(text) => setText(text)}
                             placeholder={"Enter Quote"}
-                            style={[styles.quote]}
-                            value={quote}
+                            style={[styles.text]}
+                            value={text}
                         />
+                        <TouchableHighlight style={[styles.button]} disabled={disabled} onPress={onSave} underlayColor="rgba(0, 0, 0, 0)" >
+                            <Text style={[styles.buttonText, {color: disabled ?  "rgba(255,255,255,.5)" : "#FFF"}]}>
+                                Save
+                            </Text>
+                        </TouchableHighlight>
                     </View>
-                    <TouchableHighlight style={[styles.button]} disabled={disabled} onPress={addNewQuote}>
-                        <Text style={[styles.buttonText, {color: disabled ?  "rgba(255,255,255,.5)" : "#FFF"}]}>
-                            Save
-                        </Text>
-                    </TouchableHighlight>
                 </View>
-
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     );
@@ -99,25 +106,25 @@ const styles = StyleSheet.create({
     },
 
     wrapper: {
-        flex:1, backgroundColor: '#F5F5F5'
+        flex:1,
+        backgroundColor: '#F5F5F5'
     },
 
     inputContainer:{
-        flex:1,
-        paddingLeft:10,
-        paddingRight:10
+        flex:1, borderWidth:1
     },
 
     button:{
         width: windowWidth,
-        height: 44,
+        height: 60,
         justifyContent: "center",
         alignItems: 'center',
-        backgroundColor:"#6B9EFA"
+        backgroundColor:"#6B9EFA", borderWidth:1
     },
 
     buttonText:{
         fontWeight: "500",
+        fontSize: 18,
     },
 
     author: {
@@ -125,22 +132,20 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         fontSize: 16,
         fontFamily: 'Helvetica Neue',
-        height:25+32,
-        padding: 16,
-        paddingLeft:0
+        height:80,
+        padding: 16, borderWidth:1
     },
 
-    quote: {
+    text: {
         fontSize: 17,
         lineHeight: 38,
         fontFamily: 'Helvetica Neue',
         color: "#333333",
         padding: 16,
-        paddingLeft:0,
-        flex:1,
-        height: 200,
-        marginBottom:50,
+        paddingTop: 16,
+        minHeight: 200,
         borderTopWidth: 1,
-        borderColor: "rgba(212,211,211, 0.3)",
+        // borderColor: "rgba(212,211,211, 0.3)",
+        borderWidth:1
     }
 });

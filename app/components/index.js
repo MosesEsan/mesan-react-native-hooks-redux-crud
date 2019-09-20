@@ -2,7 +2,7 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
 import HomeScreen from './home'
-import NewQuoteScreen from './new_quote'
+import NewQuoteScreen from './NewQuote'
 
 const AppStack = createStackNavigator({
     Home:{
