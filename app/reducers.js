@@ -27,11 +27,11 @@ const dataReducer = (state = dataState, action) => {
             //clone the current state
             let clone = JSON.parse(JSON.stringify(state.quotes));
 
-            //check if bookmark already exist
+            //check if quote already exist
             const index = clone.findIndex((obj) => obj.id === quote.id);
 
-            //if the quote is in the array, remove the bookmark
-            if (index !== -1) quotes[index] = quote;
+            //if the quote is in the array, replace the quote
+            if (index !== -1) clone[index] = quote;
 
             return {...state, quotes: clone};
         }
@@ -60,4 +60,3 @@ const dataReducer = (state = dataState, action) => {
 const rootReducer = combineReducers({dataReducer});
 
 export default rootReducer;
-

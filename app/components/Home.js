@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import { FlatList, StyleSheet, SafeAreaView, View, Text, ActivityIndicator, TouchableHighlight} from 'react-native';
+import {
+    FlatList,
+    StyleSheet,
+    SafeAreaView,
+    View,
+    Text,
+    ActivityIndicator,
+    TouchableHighlight,
+    AsyncStorage
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import axios from 'axios';
@@ -30,12 +39,21 @@ export default function Home(props) {
     const getData = () => {
         setIsFetching(true);
 
-        let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
-        axios.get(url)
-            .then(res => res.data)
-            .then((data) => dispatch(addQuotes(data)))
-            .catch(error => alert(error.message))
-            .finally(() => setIsFetching(false));
+        //OPTION 1 - LOCAL DATA
+        AsyncStorage.getItem('quotes', (err, quotes) => {
+            if (err) alert(err.message);
+            else if (quotes !== null) dispatch(addQuotes(JSON.parse(quotes)));
+
+            setIsFetching(false)
+        });
+
+        //OPTION 2 - FAKE API
+        // let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
+        // axios.get(url)
+        //     .then(res => res.data)
+        //     .then((data) => dispatch(addQuotes(data)))
+        //     .catch(error => alert(error.message))
+        //     .finally(() => setIsFetching(false));
     };
 
     //==================================================================================================
@@ -51,16 +69,30 @@ export default function Home(props) {
 
     //6 - DELETE QUOTE
     const onDelete = (id) => {
-        let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
-        axios.delete(url, {data:{id:id}})
-            .then((res) => {
 
-                alert("back");
-                console.log(res)
-                dispatch(deleteQuote(id))
-            })
-            .catch(error => alert(error.message))
-            .finally(() => setIsFetching(false));
+        //OPTION 1 - UPDATE LOCAL STORAGE DATA
+        AsyncStorage.getItem('quotes', (err, quotes) => {
+            if (err) alert(err.message);
+            else if (quotes !== null){
+                quotes = JSON.parse(quotes);
+
+                //find the index of the quote with the id passed
+                const index = quotes.findIndex((obj) => obj.id === id);
+
+                // remove the quote
+                if (index !== -1) quotes.splice(index, 1);
+
+                //Update the local storage
+                AsyncStorage.setItem('quotes', JSON.stringify(quotes), () => dispatch(deleteQuote(id)));
+            }
+        });
+
+        //OPTION 2 - FAKE API
+        // let url = "https://my-json-server.typicode.com/mesandigital/demo/quotes";
+        // axios.delete(url, {data:{id:id}})
+        //     .then((res) => dispatch(deleteQuote(id)))
+        //     .catch(error => alert(error.message))
+        //     .finally(() => setIsFetching(false));
     };
 
     //==================================================================================================
@@ -123,5 +155,5 @@ const styles = StyleSheet.create({
             height: 1,
             width: 0
         }
-    },
+    }
 });
