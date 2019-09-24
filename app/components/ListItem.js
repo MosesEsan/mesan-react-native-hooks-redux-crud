@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
-export default function ListItem ({item, index, navigation, onDelete}){
+let colours = ["#ff8e42", "#4F6384"];
+
+export default function ListItem ({item, index, navigation, onDelete, onEdit}){
+    const inputEl = useRef(null);
 
     const RightActions = ({ progress, dragX, onPress, item}) => {
         const scale = dragX.interpolate({
@@ -14,14 +17,20 @@ export default function ListItem ({item, index, navigation, onDelete}){
         });
         return (
             <View style={styles.buttons}>
-                <RectButton onPress={() =>  navigation.navigate('NewQuote', {quote: item, title:"Edit Quote"})}>
+                <RectButton onPress={() =>  {
+                    inputEl.current.close();
+                    onEdit(item);
+                }}>
                     <View style={[styles.rightAction, styles.editAction]}>
                         <Animated.Text style={[styles.actionText, { transform: [{ scale }] }]}>
                             Edit
                         </Animated.Text>
                     </View>
                 </RectButton>
-                <RectButton onPress={() => onDelete(item.id)}>
+                <RectButton onPress={() => {
+                    inputEl.current.close();
+                    onDelete(item.id)
+                }}>
                     <View style={[styles.rightAction, styles.deleteAction]}>
                         <Animated.Text style={[styles.actionText, { transform: [{ scale }] }]}>
                             Delete
@@ -32,40 +41,64 @@ export default function ListItem ({item, index, navigation, onDelete}){
         );
     };
 
+    //Returns a colour based on the index
+    function random() {
+        if (index % 2 === 0) { //check if its an even number
+            return colours[0];
+        }else{
+            return colours[1];
+        }
+    }
+
     return (
-        <Swipeable
+        <Swipeable  ref={inputEl}
             renderRightActions={(progress, dragX) => (
                 <RightActions progress={progress} dragX={dragX} item={item}/>
             )}>
             <View style={styles.row}>
-                <Text style={styles.quote}>
-                    {item.text}
-                </Text>
-                <Text style={styles.author}>
-                    {item.author}
-                </Text>
+                <View style={[styles.container, {backgroundColor: random()}]}>
+                    <Text style={styles.quote}>
+                        {item.text}
+                    </Text>
+                    <Text style={styles.author}>
+                        {item.author}
+                    </Text>
+                </View>
             </View>
         </Swipeable>
     )
+
 };
+
+
 
 const styles = StyleSheet.create({
     row:{
-        borderBottomWidth: 1,
-        borderColor: "#ccc",
-        padding: 10,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor:"#ccc",
         backgroundColor: '#FFF',
+        padding: 10
+    },
+
+    container:{
+        padding: 10
     },
 
     author: {
-        fontSize: 14,
-        fontWeight: "600",
-        marginTop: 8 * 2
+        marginTop: 25,
+        marginBottom: 10,
+        fontFamily: 'HelveticaNeue-Medium',
+        fontSize: 15,
+        color: '#FFF',
+        textAlign: "right"
     },
 
     quote: {
         marginTop: 5,
-        fontSize: 14,
+        fontFamily: 'HelveticaNeue-Medium',
+        fontSize: 17,
+        lineHeight: 21,
+        color: '#FFF',
     },
 
     buttons:{

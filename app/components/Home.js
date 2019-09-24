@@ -61,8 +61,15 @@ export default function Home(props) {
     //4 - RENDER FLATLIST ITEM
     const renderItem = ({item, index}) => {
         return (
-            <ListItem item={item} index={index} navigation={navigation} onDelete={onDelete}/>
+            <ListItem item={item} index={index} navigation={navigation} onDelete={onDelete} onEdit={onEdit}/>
         )
+    };
+
+    //==================================================================================================
+
+    //5 - EDIT QUOTE
+    const onEdit = (item) => {
+        navigation.navigate('NewQuote', {quote: item, title:"Edit Quote"})
     };
 
     //==================================================================================================
@@ -97,7 +104,7 @@ export default function Home(props) {
 
     //==================================================================================================
 
-    //5 - RENDER
+    //7 - RENDER
     if (isFetching) {
         return (
             <View style={styles.activityIndicatorContainer}>
@@ -137,19 +144,18 @@ const styles = StyleSheet.create({
     },
 
     floatingButton:{
-        backgroundColor: '#ff5722',
-        borderColor: '#ff5722',
-        borderWidth: 1,
-        height: 50,
-        width: 50,
-        borderRadius: 50 / 2,
+        backgroundColor: '#6B9EFA',
+        borderColor: '#6B9EFA',
+        height: 55,
+        width: 55,
+        borderRadius: 55 / 2,
         alignItems: 'center',
         justifyContent: 'center',
         position: 'absolute',
-        bottom: 20,
-        right: 20,
+        bottom: 60,
+        right: 15,
         shadowColor: "#000000",
-        shadowOpacity: 0.8,
+        shadowOpacity: 0.5,
         shadowRadius: 2,
         shadowOffset: {
             height: 1,

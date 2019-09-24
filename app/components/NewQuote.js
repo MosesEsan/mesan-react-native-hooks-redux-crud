@@ -66,8 +66,8 @@ export default function NewQuote(props) {
 
                 //Update the local storage
                 AsyncStorage.setItem('quotes', JSON.stringify(quotes), () => {
-                    if (!edit) dispatch(addQuote(quote_))
-                    else dispatch(updateQuote(quote_))
+                    if (!edit) dispatch(addQuote(quote_));
+                    else dispatch(updateQuote(quote_));
 
                     navigation.goBack();
                 });
@@ -97,7 +97,7 @@ export default function NewQuote(props) {
         });
 
         return id;
-    }
+    };
 
     //==================================================================================================
 
