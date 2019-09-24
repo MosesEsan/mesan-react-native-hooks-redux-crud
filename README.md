@@ -1,7 +1,7 @@
 # Tutorial 2a: How to add CRUD operations to your React Native app using React Hooks and Redux
 
 ### Demo
-![Demo](https://github.com/MosesEsan/mesan-react-native-hooks-redux-boilerplate/blob/master/demo.gif "demo")
+![Demo](https://github.com/MosesEsan/mesan-react-native-hooks-redux-crud/blob/master/demo.gif "demo")
 
 ### Tutorial
 <ul>
