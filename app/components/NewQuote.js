@@ -24,7 +24,7 @@ export default function NewQuote(props) {
     const dispatch = useDispatch();
     const {navigation} = props;
 
-    let quote = navigation.getParam('quote');
+    let quote = navigation.getParam('quote', null);
 
     //1 - DECLARE VARIABLES
     const [isSaving, setIsSaving] = useState(false);
@@ -36,7 +36,6 @@ export default function NewQuote(props) {
     //2 - GET FLATLIST DATA
     const onSave = () => {
         let edit = quote !== null;
-
         let quote_ = {};
 
         if (edit) {
@@ -56,13 +55,13 @@ export default function NewQuote(props) {
 
                 if (!edit){
                     //add the new quote to the top
-                    quotes.unshift(quote);
+                    quotes.unshift(quote_);
                 }else{
                     //find the index of the quote with the quote id
                     const index = quotes.findIndex((obj) => obj.id === quote_.id);
 
                     //if the quote is in the array, replace the quote
-                    if (index !== -1) quotes[index] = quote;
+                    if (index !== -1) quotes[index] = quote_;
                 }
 
                 //Update the local storage
