@@ -30,7 +30,7 @@ const dataReducer = (state = dataState, action) => {
             //check if bookmark already exist
             const index = clone.findIndex((obj) => obj.id === quote.id);
 
-            //if the quote is in the array, remove the bookmark
+            //if the quote is in the array, update the quote
             if (index !== -1) clone[index] = quote;
 
             return {...state, quotes: clone};
